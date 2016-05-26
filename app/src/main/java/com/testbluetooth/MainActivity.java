@@ -1,16 +1,28 @@
 package com.testbluetooth;
 
+import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Button;
 
+import java.util.ArrayList;
+import java.util.List;
+
+@TargetApi(Build.VERSION_CODES.M)
 public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     private int REQUEST_ENABLE_BT = 123;
@@ -22,6 +34,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private Button btnDiscoverable;
     private Button btnStartDiscover;
     private Button btnStopDiscover;
+
+    private Handler scanHandler = new Handler();
+    private List<ScanFilter> scanFilters = new ArrayList<ScanFilter>();
+    private ScanSettings scanSettings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,13 +110,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 break;
             case R.id.btnStartDiscover:
                 if (bluetoothAdapter.isEnabled()) {
-//                    bluetoothAdapter.startDiscovery();
-
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        startScan();
+                    } else {
+                        bluetoothAdapter.startDiscovery();
+                    }
                 }
                 break;
             case R.id.btnStopDiscover:
                 if (bluetoothAdapter.isEnabled()) {
-                    bluetoothAdapter.cancelDiscovery();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        stopScan();
+                    } else {
+                        bluetoothAdapter.cancelDiscovery();
+                    }
                 }
                 break;
         }
@@ -117,6 +140,65 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             setBtnEnable();
         }
     }
+
+    private void startScan() {
+        ScanFilter mScanFilterTest = new ScanFilter.Builder().build();
+        scanFilters.add(mScanFilterTest);
+
+        ScanSettings.Builder scanSettingsBuilder = new ScanSettings.Builder();
+        scanSettingsBuilder.setScanMode(ScanSettings.SCAN_MODE_LOW_POWER);
+        scanSettingsBuilder.setReportDelay(0);
+        scanSettingsBuilder.setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES);
+        scanSettings = scanSettingsBuilder.build();
+
+        BluetoothLeScanner scanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
+        scanner.startScan(scanFilters, scanSettings, scanCallback);
+
+//        scanHandler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                BluetoothLeScanner scanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
+//                scanner.startScan(scanFilters, scanSettings, scanCallback);
+//            }
+//        }, 1000);
+    }
+
+    private void stopScan() {
+        BluetoothLeScanner scanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
+        scanner.stopScan(scanCallback);
+    }
+
+    private ScanCallback scanCallback = new ScanCallback() {
+
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            super.onScanResult(callbackType, result);
+            showToast(result.getDevice().getName());
+        }
+
+        @Override
+        public void onBatchScanResults(List<ScanResult> results) {
+            super.onBatchScanResults(results);
+            String name = "";
+            for (ScanResult scanResult : results) {
+                name += scanResult.getDevice().getName() + "--";
+            }
+            showToast(name);
+        }
+
+        @Override
+        public void onScanFailed(int errorCode) {
+            super.onScanFailed(errorCode);
+            showToast("Error: " + errorCode);
+        }
+    };
+
+    BluetoothAdapter.LeScanCallback leScanCallback = new BluetoothAdapter.LeScanCallback() {
+        @Override
+        public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
+
+        }
+    };
 
     @Override
     protected void onDestroy() {
