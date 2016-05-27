@@ -15,7 +15,6 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Button;
 
@@ -110,20 +109,22 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 break;
             case R.id.btnStartDiscover:
                 if (bluetoothAdapter.isEnabled()) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        startScan();
-                    } else {
-                        bluetoothAdapter.startDiscovery();
-                    }
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                        startScan();
+//                    } else {
+//                        bluetoothAdapter.startDiscovery();
+//                    }
+                    bluetoothAdapter.startDiscovery();
                 }
                 break;
             case R.id.btnStopDiscover:
                 if (bluetoothAdapter.isEnabled()) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        stopScan();
-                    } else {
-                        bluetoothAdapter.cancelDiscovery();
-                    }
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                        stopScan();
+//                    } else {
+//                        bluetoothAdapter.cancelDiscovery();
+//                    }
+                    bluetoothAdapter.cancelDiscovery();
                 }
                 break;
         }
@@ -146,13 +147,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         scanFilters.add(mScanFilterTest);
 
         ScanSettings.Builder scanSettingsBuilder = new ScanSettings.Builder();
-        scanSettingsBuilder.setScanMode(ScanSettings.SCAN_MODE_LOW_POWER);
+        scanSettingsBuilder.setScanMode(ScanSettings.SCAN_MODE_BALANCED);
         scanSettingsBuilder.setReportDelay(0);
         scanSettingsBuilder.setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES);
         scanSettings = scanSettingsBuilder.build();
 
         BluetoothLeScanner scanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
-        scanner.startScan(scanFilters, scanSettings, scanCallback);
+        scanner.startScan(null, scanSettings, scanCallback);
 
 //        scanHandler.postDelayed(new Runnable() {
 //            @Override
