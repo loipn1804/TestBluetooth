@@ -1,27 +1,20 @@
 package com.testbluetooth;
 
-import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.le.BluetoothLeScanner;
-import android.bluetooth.le.ScanCallback;
-import android.bluetooth.le.ScanFilter;
-import android.bluetooth.le.ScanResult;
-import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-@TargetApi(Build.VERSION_CODES.M)
 public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     private int REQUEST_ENABLE_BT = 123;
@@ -34,9 +27,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private Button btnStartDiscover;
     private Button btnStopDiscover;
 
-    private Handler scanHandler = new Handler();
-    private List<ScanFilter> scanFilters = new ArrayList<ScanFilter>();
-    private ScanSettings scanSettings;
+    private ListView lvBonded;
+    private List<String> bondedList;
+    private SimpleStringAdapter bondedAdapter;
+
+    private ListView lvAvailable;
+    private List<String> availableList;
+    private SimpleStringAdapter availableAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +52,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         btnStartDiscover = (Button) findViewById(R.id.btnStartDiscover);
         btnStopDiscover = (Button) findViewById(R.id.btnStopDiscover);
 
+        lvBonded = (ListView) findViewById(R.id.lvBonded);
+        lvAvailable = (ListView) findViewById(R.id.lvAvailable);
+
         btnEnable.setOnClickListener(this);
         btnDiscoverable.setOnClickListener(this);
         btnStartDiscover.setOnClickListener(this);
@@ -65,6 +65,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         setBtnEnable();
         setBtnDiscoverable();
+
+        setListBonded();
+        if (bluetoothAdapter.isEnabled()) {
+            availableList.clear();
+            availableAdapter.setListData(availableList);
+            bluetoothAdapter.startDiscovery();
+        }
     }
 
     private void setBtnEnable() {
@@ -109,21 +116,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 break;
             case R.id.btnStartDiscover:
                 if (bluetoothAdapter.isEnabled()) {
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                        startScan();
-//                    } else {
-//                        bluetoothAdapter.startDiscovery();
-//                    }
+                    availableList.clear();
+                    availableAdapter.setListData(availableList);
+                    if (bluetoothAdapter.isDiscovering()) {
+                        bluetoothAdapter.cancelDiscovery();
+                    }
                     bluetoothAdapter.startDiscovery();
                 }
                 break;
             case R.id.btnStopDiscover:
                 if (bluetoothAdapter.isEnabled()) {
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                        stopScan();
-//                    } else {
-//                        bluetoothAdapter.cancelDiscovery();
-//                    }
                     bluetoothAdapter.cancelDiscovery();
                 }
                 break;
@@ -142,64 +144,26 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
     }
 
-    private void startScan() {
-        ScanFilter mScanFilterTest = new ScanFilter.Builder().build();
-        scanFilters.add(mScanFilterTest);
+    private void setListBonded() {
+        availableList = new ArrayList<>();
+        availableAdapter = new SimpleStringAdapter(this, availableList);
+        lvAvailable.setAdapter(availableAdapter);
 
-        ScanSettings.Builder scanSettingsBuilder = new ScanSettings.Builder();
-        scanSettingsBuilder.setScanMode(ScanSettings.SCAN_MODE_BALANCED);
-        scanSettingsBuilder.setReportDelay(0);
-        scanSettingsBuilder.setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES);
-        scanSettings = scanSettingsBuilder.build();
+        bondedList = new ArrayList<>();
+        bondedAdapter = new SimpleStringAdapter(this, bondedList);
+        lvBonded.setAdapter(bondedAdapter);
 
-        BluetoothLeScanner scanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
-        scanner.startScan(null, scanSettings, scanCallback);
-
-//        scanHandler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                BluetoothLeScanner scanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
-//                scanner.startScan(scanFilters, scanSettings, scanCallback);
-//            }
-//        }, 1000);
-    }
-
-    private void stopScan() {
-        BluetoothLeScanner scanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
-        scanner.stopScan(scanCallback);
-    }
-
-    private ScanCallback scanCallback = new ScanCallback() {
-
-        @Override
-        public void onScanResult(int callbackType, ScanResult result) {
-            super.onScanResult(callbackType, result);
-            showToast(result.getDevice().getName());
-        }
-
-        @Override
-        public void onBatchScanResults(List<ScanResult> results) {
-            super.onBatchScanResults(results);
-            String name = "";
-            for (ScanResult scanResult : results) {
-                name += scanResult.getDevice().getName() + "--";
+        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+        // If there are paired devices
+        if (pairedDevices.size() > 0) {
+            // Loop through paired devices
+            for (BluetoothDevice device : pairedDevices) {
+                // Add the name and address to an array adapter to show in a ListView
+                bondedList.add(device.getName() + " - " + device.getAddress() + " - " + device.getUuids());
             }
-            showToast(name);
+            bondedAdapter.setListData(bondedList);
         }
-
-        @Override
-        public void onScanFailed(int errorCode) {
-            super.onScanFailed(errorCode);
-            showToast("Error: " + errorCode);
-        }
-    };
-
-    BluetoothAdapter.LeScanCallback leScanCallback = new BluetoothAdapter.LeScanCallback() {
-        @Override
-        public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-
-        }
-    };
+    }
 
     @Override
     protected void onDestroy() {
@@ -220,6 +184,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 // Add the name and address to an array adapter to show in a ListView
                 showToast(device.getName() + "--" + device.getAddress());
+                availableList.add(device.getName() + " - " + device.getAddress() + " - " + device.getUuids());
+                availableAdapter.setListData(availableList);
             }
         }
     };
