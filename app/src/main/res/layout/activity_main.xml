@@ -1,38 +1,70 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="#ffffff"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/btnEnable"
-        android:layout_width="100dp"
-        android:layout_height="50dp"
-        android:text="Enable" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/btnDiscoverable"
-        android:layout_width="200dp"
-        android:layout_height="50dp"
-        android:layout_toRightOf="@+id/btnEnable"
-        android:text="Discoverable" />
+        <Button
+            android:id="@+id/btnEnable"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:text="Enable" />
 
-    <Button
-        android:id="@+id/btnStartDiscover"
-        android:layout_width="180dp"
-        android:layout_height="50dp"
-        android:layout_below="@+id/btnEnable"
-        android:text="Start Discover" />
+        <Button
+            android:id="@+id/btnDiscoverable"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:text="Discoverable" />
+    </LinearLayout>
 
-    <Button
-        android:id="@+id/btnStopDiscover"
-        android:layout_width="180dp"
-        android:layout_height="50dp"
-        android:layout_alignBaseline="@+id/btnStartDiscover"
-        android:layout_toRightOf="@+id/btnStartDiscover"
-        android:text="Stop Discover" />
-</RelativeLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnStartDiscover"
+            android:layout_width="180dp"
+            android:layout_height="50dp"
+            android:text="Start Discover" />
+
+        <Button
+            android:id="@+id/btnStopDiscover"
+            android:layout_width="180dp"
+            android:layout_height="50dp"
+            android:text="Stop Discover" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txtBondedLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="#eeeeee"
+        android:text="Bonded" />
+
+    <ListView
+        android:id="@+id/lvBonded"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"></ListView>
+
+    <TextView
+        android:id="@+id/txtAvailableLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="#eeeeee"
+        android:text="Available" />
+
+    <ListView
+        android:id="@+id/lvAvailable"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"></ListView>
+</LinearLayout>
