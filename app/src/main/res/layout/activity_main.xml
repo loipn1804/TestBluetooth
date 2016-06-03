@@ -42,6 +42,24 @@
             android:text="Stop Discover" />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnServer"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:text="Server" />
+
+        <Button
+            android:id="@+id/btnClient"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:text="Client" />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/txtBondedLabel"
         android:layout_width="match_parent"

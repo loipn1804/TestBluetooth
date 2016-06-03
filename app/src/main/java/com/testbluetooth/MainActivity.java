@@ -26,6 +26,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private Button btnDiscoverable;
     private Button btnStartDiscover;
     private Button btnStopDiscover;
+    private Button btnServer;
+    private Button btnClient;
 
     private ListView lvBonded;
     private List<String> bondedList;
@@ -34,6 +36,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private ListView lvAvailable;
     private List<String> availableList;
     private SimpleStringAdapter availableAdapter;
+
+    private String addressBonded = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +55,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         btnDiscoverable = (Button) findViewById(R.id.btnDiscoverable);
         btnStartDiscover = (Button) findViewById(R.id.btnStartDiscover);
         btnStopDiscover = (Button) findViewById(R.id.btnStopDiscover);
+        btnServer = (Button) findViewById(R.id.btnServer);
+        btnClient = (Button) findViewById(R.id.btnClient);
 
         lvBonded = (ListView) findViewById(R.id.lvBonded);
         lvAvailable = (ListView) findViewById(R.id.lvAvailable);
@@ -59,6 +65,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         btnDiscoverable.setOnClickListener(this);
         btnStartDiscover.setOnClickListener(this);
         btnStopDiscover.setOnClickListener(this);
+        btnServer.setOnClickListener(this);
+        btnClient.setOnClickListener(this);
     }
 
     private void initData() {
@@ -129,6 +137,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     bluetoothAdapter.cancelDiscovery();
                 }
                 break;
+            case R.id.btnServer:
+                Intent intentServer = new Intent(this, ServerActivity.class);
+                startActivity(intentServer);
+                break;
+            case R.id.btnClient:
+                Intent intentClient = new Intent(this, ClientActivity.class);
+                intentClient.putExtra("address", addressBonded);
+                startActivity(intentClient);
+                break;
         }
     }
 
@@ -160,6 +177,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             for (BluetoothDevice device : pairedDevices) {
                 // Add the name and address to an array adapter to show in a ListView
                 bondedList.add(device.getName() + " - " + device.getAddress() + " - " + device.getUuids());
+                addressBonded = device.getAddress();
+                showToast(addressBonded);
             }
             bondedAdapter.setListData(bondedList);
         }
