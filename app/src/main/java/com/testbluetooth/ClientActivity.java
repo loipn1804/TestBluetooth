@@ -57,10 +57,12 @@ public class ClientActivity extends BaseActivity implements View.OnClickListener
         super.onDestroy();
         if (connectThread != null) {
             connectThread.cancel();
+            connectThread.interrupt();
             connectThread = null;
         }
         if (connectedThread != null) {
             connectedThread.cancel();
+            connectedThread.interrupt();
             connectedThread = null;
         }
     }

@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.os.Message;
 
 import java.io.IOException;
-import java.util.UUID;
 
 /**
  * Created by USER on 06/02/2016.
@@ -18,12 +17,6 @@ public class AcceptThread extends Thread {
     public interface AcceptedCallback {
         void accepted(BluetoothSocket socket);
     }
-
-    // Name for the SDP record when creating server socket
-    private static final String NAME_SECURE = "BluetoothChatSecure";
-
-    // Unique UUID for this application
-    private static final UUID MY_UUID_SECURE = UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a77");
 
     private BluetoothServerSocket bluetoothServerSocket;
 
@@ -36,11 +29,13 @@ public class AcceptThread extends Thread {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         BluetoothServerSocket tmp = null;
 
+        String NAME_SECURE = UUID_String.NAME_SECURE;
+        java.util.UUID MY_UUID_SECURE = UUID_String.MY_UUID_SECURE;
+
         try {
             tmp = bluetoothAdapter.listenUsingRfcommWithServiceRecord(NAME_SECURE, MY_UUID_SECURE);
         } catch (IOException e) {
-            String error = e.getMessage();
-            int a = 0;
+
         }
 
         bluetoothServerSocket = tmp;
@@ -61,7 +56,7 @@ public class AcceptThread extends Thread {
                 // successful connection or an exception
                 socket = bluetoothServerSocket.accept();
             } catch (IOException e) {
-
+                sendMessage("accept fail");
                 break;
             }
 
@@ -70,7 +65,7 @@ public class AcceptThread extends Thread {
                 synchronized (this) {
                     sendMessage("accepted");
                     acceptedCallback.accepted(socket);
-                    break;
+//                    break;
                 }
             }
         }

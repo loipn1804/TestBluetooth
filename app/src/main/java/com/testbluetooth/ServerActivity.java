@@ -11,13 +11,16 @@ import android.widget.Button;
 import com.testbluetooth.socket.AcceptThread;
 import com.testbluetooth.socket.ConnectedThread;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by USER on 06/02/2016.
  */
 public class ServerActivity extends BaseActivity implements OnClickListener, AcceptThread.AcceptedCallback {
 
     private AcceptThread acceptThread;
-    private ConnectedThread connectedThread;
+    private List<ConnectedThread> connectedThreadList;
 
     private Button btnStartServer;
     private Button btnSend;
@@ -40,7 +43,7 @@ public class ServerActivity extends BaseActivity implements OnClickListener, Acc
     }
 
     private void initData() {
-
+        connectedThreadList = new ArrayList<>();
     }
 
     @Override
@@ -48,11 +51,15 @@ public class ServerActivity extends BaseActivity implements OnClickListener, Acc
         super.onDestroy();
         if (acceptThread != null) {
             acceptThread.cancel();
+            acceptThread.interrupt();
             acceptThread = null;
         }
-        if (connectedThread != null) {
-            connectedThread.cancel();
-            connectedThread = null;
+        for (ConnectedThread connectedThread : connectedThreadList) {
+            if (connectedThread != null) {
+                connectedThread.cancel();
+                connectedThread.interrupt();
+                connectedThread = null;
+            }
         }
     }
 
@@ -67,9 +74,7 @@ public class ServerActivity extends BaseActivity implements OnClickListener, Acc
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnSend:
-                if (connectedThread != null) {
-                    connectedThread.write("server message");
-                }
+                sendMessage("server message");
                 break;
             case R.id.btnStartServer:
                 acceptThread = new AcceptThread(mHandler, this);
@@ -78,9 +83,18 @@ public class ServerActivity extends BaseActivity implements OnClickListener, Acc
         }
     }
 
+    private void sendMessage(String message) {
+        for (ConnectedThread connectedThread : connectedThreadList) {
+            if (connectedThread != null) {
+                connectedThread.write(message);
+            }
+        }
+    }
+
     @Override
     public void accepted(BluetoothSocket socket) {
-        connectedThread = new ConnectedThread(socket, mHandler);
+        ConnectedThread connectedThread = new ConnectedThread(socket, mHandler);
+        connectedThreadList.add(connectedThread);
         connectedThread.start();
     }
 }

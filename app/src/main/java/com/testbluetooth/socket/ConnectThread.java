@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.os.Message;
 
 import java.io.IOException;
-import java.util.UUID;
 
 /**
  * Created by USER on 06/02/2016.
@@ -18,12 +17,6 @@ public class ConnectThread extends Thread {
     public interface ConnectedCallback {
         void connect(BluetoothSocket socket);
     }
-
-    // Name for the SDP record when creating server socket
-    private static final String NAME_SECURE = "BluetoothChatSecure";
-
-    // Unique UUID for this application
-    private static final UUID MY_UUID_SECURE = UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a77");
 
     private BluetoothSocket bluetoothSocket;
     private BluetoothDevice bluetoothDevice;
@@ -39,6 +32,8 @@ public class ConnectThread extends Thread {
         this.bluetoothDevice = bluetoothDevice;
 
         BluetoothSocket tmp = null;
+
+        java.util.UUID MY_UUID_SECURE = UUID_String.MY_UUID_SECURE;
 
         try {
             tmp = bluetoothDevice.createRfcommSocketToServiceRecord(MY_UUID_SECURE);
